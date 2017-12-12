@@ -48,7 +48,7 @@ whitelist = []
 print("add and enhance keywords")
 kwAttr = buildKeywords(df, blacklist, whitelist, 
                        kwAttr='keywords', txtAttr='text', 
-                       syndic=False, addFromText=True, enhance=True)
+                       syndic=syndic, addFromText=True, enhance=True)
  
 
 #list cols to remove from final file
