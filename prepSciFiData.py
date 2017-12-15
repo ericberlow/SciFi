@@ -16,7 +16,7 @@ sys.setdefaultencoding('utf-8')
 
 datapath = "GR_Reviews"
 outpath = "Results"
-outname = "scifi.txt"
+outname = "scifi_test.txt"
 
 # read in list of files (pathnames) from folder
 print("reading files from %s"%datapath)
@@ -29,6 +29,7 @@ df['Reviews'] = df['Reviews'].str.lower()
 df.rename(columns={'Reviews': 'text'}, inplace=True)
 df['keywords'] = ''
 
+df = df.iloc[0:500,:] #test with first 500 records
 
 # write tab-delmited text file
 print("writing output file to %s"%outpath)

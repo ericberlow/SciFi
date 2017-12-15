@@ -22,9 +22,10 @@ from Network.BuildNetwork import buildTagNetwork
 # Define input and output file paths
 dictpath = "."
 datapath = "Results"
-fname = os.path.join(datapath, "scifi.txt")
+#fname = os.path.join(datapath, "scifi_test.txt") #test with first 500 records
+fname = os.path.join(datapath, "scifi.txt") 
 sdname = os.path.join(dictpath, "scifi_syndic.xlsx")
-outname = os.path.join(datapath, "scifi_network.xlsx")
+outname = os.path.join(datapath, "scifi_network_noIDF.xlsx")
 plotfile = os.path.join(datapath, "scifi_plot.pdf")
 
 
@@ -33,7 +34,7 @@ print ('reading text file')
 df = pd.read_csv(fname, sep='\t', header=0, encoding='utf-8')
 print ('data reading done')
 df = df.fillna('')
-df = df.iloc[0:500,:] #test with first 500 records
+#df = df.iloc[0:500,:] #test with first 500 records
 
 # read dictonary of search terms mapped to common terms (key is search term, value is unique common term)
 sd_df = pd.read_excel(sdname)
@@ -52,10 +53,16 @@ kwAttr = buildKeywords(df, blacklist, whitelist,
 
 
 #list cols to remove from final file
-dropCols = []
+dropCols = ['text', 'keywords'] # some books have very long comment text
+
+# remove records where there was no keyword match
+df = df[df['enhanced_keywords'] != ''] 
+
+df['label'] = df['Title']
+df['keyword list'] = df['enhanced_keywords'].str.replace("|", ", ")
 
 # build network linked by keyword similarity
-buildTagNetwork(df, tagAttr=kwAttr, dropCols=[], outname=outname,idf=True,
+buildTagNetwork(df, tagAttr=kwAttr, dropCols=dropCols, outname=outname,idf=False,
                         nodesname=None, edgesname=None, plotfile=plotfile,
                         toFile=True, doLayout=True, draw=True)
 
