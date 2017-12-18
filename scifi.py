@@ -62,9 +62,10 @@ df['label'] = df['Title']
 df['keyword list'] = df['enhanced_keywords'].str.replace("|", ", ")
 
 # build network linked by keyword similarity
-buildTagNetwork(df, tagAttr=kwAttr, dropCols=dropCols, outname=outname,idf=False,
-                        nodesname=None, edgesname=None, plotfile=plotfile,
-                        toFile=True, doLayout=True, draw=True)
+buildTagNetwork(df, color_attr="Cluster", tagAttr=kwAttr, dropCols=dropCols, 
+                outname=outname,idf=False,
+                nodesname=None, edgesname=None, plotfile=plotfile,
+                toFile=True, doLayout=True, draw=True)
 
 
 
