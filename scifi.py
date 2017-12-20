@@ -18,6 +18,8 @@ import pandas as pd
 from Tags.BuildKeywords import buildKeywords
 from Network.BuildNetwork import buildTagNetwork
 
+# set wether or not to downweight common terms
+idf = True
 
 # Define input and output file paths
 dictpath = "."
@@ -25,8 +27,8 @@ datapath = "Results"
 #fname = os.path.join(datapath, "scifi_test.txt") #test with first 500 records
 fname = os.path.join(datapath, "scifi.txt") 
 sdname = os.path.join(dictpath, "scifi_syndic.xlsx")
-outname = os.path.join(datapath, "scifi_network_noIDF.xlsx")
-plotfile = os.path.join(datapath, "scifi_plot.pdf")
+outname = os.path.join(datapath, "scifi_network_IDF.xlsx")
+plotfile = os.path.join(datapath, "scifi_plot_IDF.pdf")
 
 
 # read text and keyword file
@@ -63,7 +65,7 @@ df['keyword list'] = df['enhanced_keywords'].str.replace("|", ", ")
 
 # build network linked by keyword similarity
 buildTagNetwork(df, color_attr="Cluster", tagAttr=kwAttr, dropCols=dropCols, 
-                outname=outname,idf=False,
+                outname=outname,idf=idf,
                 nodesname=None, edgesname=None, plotfile=plotfile,
                 toFile=True, doLayout=True, draw=True)
 
