@@ -114,5 +114,6 @@ ENV/
 # big data files
 GR_Reviews/*.*
 Results/*.*
+Test/*.*
 
 
