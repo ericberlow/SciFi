@@ -29,7 +29,8 @@ df['Reviews'] = df['Reviews'].str.lower()
 df.rename(columns={'Reviews': 'text'}, inplace=True)
 df['keywords'] = ''
 
-#df = df.iloc[0:500,:] #test with first 500 records
+# df = df[df['Title']== "Ready Player One"] # spot check book
+# df = df.iloc[0:500,:] #test with first 500 records
 
 # write tab-delmited text file
 print("writing output file to %s"%outpath)
