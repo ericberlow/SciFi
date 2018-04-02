@@ -115,5 +115,6 @@ ENV/
 GR_Reviews/*.*
 Results/*.*
 Test/*.*
+data_json/*.*
 
 
