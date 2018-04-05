@@ -19,16 +19,16 @@ from Tags.BuildKeywords import buildKeywords
 from Network.BuildNetwork import buildTagNetwork
 
 # set wether or not to downweight common terms
-idf = True
+idf = False
 
 # Define input and output file paths
 dictpath = "."
 datapath = "Results"
 #fname = os.path.join(datapath, "scifi_test.txt") #test with first 500 records
-fname = os.path.join(datapath, "scifi.txt") 
-sdname = os.path.join(dictpath, "scifi_syndic.xlsx")
-outname = os.path.join(datapath, "scifi_network_IDF.xlsx")
-plotfile = os.path.join(datapath, "scifi_plot_IDF.pdf")
+fname = os.path.join(datapath, "scifi_4-2-18.txt") 
+sdname = os.path.join(dictpath, "scifi_syndic_4-2-2018.xlsx")
+outname = os.path.join(datapath, "scifi_network_noIDF_4-4-18.xlsx")
+plotfile = os.path.join(datapath, "scifi_plot_IDF_4-4-18.pdf")
 
 
 # read text and keyword file
@@ -46,6 +46,8 @@ syndic = dict(zip(sd_df.Synonym,sd_df.Keyword))
 blacklist = []
 whitelist = []
 
+df['keywords'] = ''  # make blank column because no keywords from goodreads
+
 # add keywords from text: find search terms and map to common keyword term
 # enhance by splitting multi-word keywords and matching to bigrams in keyword list
 print("add and enhance keywords")
@@ -60,14 +62,14 @@ dropCols = ['text', 'keywords'] # some books have very long comment text
 # remove records where there was no keyword match
 df = df[df['enhanced_keywords'] != ''] 
 
-df['label'] = df['Title']
+df['label'] = df['title']
 df['keyword list'] = df['enhanced_keywords'].str.replace("|", ", ")
 
 # build network linked by keyword similarity
 buildTagNetwork(df, color_attr="Cluster", tagAttr=kwAttr, dropCols=dropCols, 
                 outname=outname,idf=idf,
                 nodesname=None, edgesname=None, plotfile=plotfile,
-                toFile=True, doLayout=True, draw=True)
+                toFile=True, doLayout=False, draw=False)
 
 
 

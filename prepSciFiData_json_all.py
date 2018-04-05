@@ -37,6 +37,13 @@ def getYearFn (x):
         yr = ''
     return yr
 
+def formatYrFn (x):
+    try:
+        x = int(x)
+    except ValueError:
+        x = np.nan
+    return x
+
 def multiReplaceFn (df, attrib, stringlist, replacement):
     for string in stringlist:   
         df[attrib]= df[attrib].str.replace(string, replacement)
@@ -65,32 +72,38 @@ df = df.dropna(subset=['reviews']) # remove records with no reviews
 df = df.fillna('')
 
 # year is buried in a string which is not consistent - split and find yr
-dayflags = ['st','nd','rd','th']
+dayflags = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th',
+            '11th','12th','13th','14th','15th','16th','17th','18th','19th','20th',
+            '21st','22nd','23rd','24th','25th','26th','27th','28th','29th','30th', '31st'
+            ]
 monthflags = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
+df['year(s)_published'] = df['published']
 multiReplaceFn(df,'published',monthflags,' Mo')
 multiReplaceFn(df,'published',dayflags,'--')
-df['year_published'] = df['published'].apply(lambda x: getYearFn(x)) # TODO: STILL MISSING CASES where no day mentioned)
+df['year'] = df['published'].apply(lambda x: getYearFn(x)) # TODO: STILL MISSING CASES where no day mentioned)
+df['year'] = df['year'].apply(lambda x: formatYrFn(x))
 
 
 df['n_reviews'] = df['reviews'].apply(lambda x: int(x['number'])) # within 'reviews' nested dictionary get the n review
 df['log_n_reviews'] = df['n_reviews'].apply(lambda x: np.round(np.log10(x+1),2))
 df['list_of_reviews'] = df['reviews'].apply(lambda x: x['list_of_reviews'])# within reviews dict get the 'list of reviews' 
 
-# conctentate the list of reviews - note turned that list into a set to remove duplicate reviews
-df['review_text'] = df['list_of_reviews'].apply(lambda x: ' '.join(set(x)))
-df['text'] = df['plot'] + " " + df['review_text']
-df['text'] = df['text'].str.lower()
-
 df['genre_list'] = df['genres'].apply(lambda x: x.get('names'))
 df['genre_list'] = df['genre_list'].apply(lambda x: x if isinstance(x, list) else []) # if empty cell add empty list
 df['genre_tags'] = df['genre_list'].apply(lambda x: '|'.join(x))  
-df['keywords'] = df['genre_tags']
+df['genre_string'] = df['genre_list'].apply(lambda x: ', '.join(x))
 
-dropCols = ['reviews', 'list_of_reviews', 'review_text','ratings', 'genre_list']
+# conctentate the list of reviews - note turned that list into a set to remove duplicate reviews
+# combine all text into one field
+df['review_text'] = df['list_of_reviews'].apply(lambda x: ' '.join(set(x)))
+df['text'] = df['plot'] + " " + df['review_text'] + " " + df['genre_string']
+df['text'] = df['text'].str.lower()
+
+
+dropCols = ['reviews', 'list_of_reviews', 'review_text','ratings', 'genre_list', 'genre_string']
 df.drop(dropCols, axis=1, inplace=True)
 
-colOrder = ['title','genre_tags','author','year_published','published',
-            'log_n_reviews','n_reviews', 'plot', 'url','text', 'keywords']
+colOrder = ['author', 'title','year','year(s)_published', 'log_n_reviews','n_reviews', 'plot', 'url','text', 'genre_tags']
 
 df = df[colOrder]
 
