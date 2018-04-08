@@ -9,8 +9,8 @@ Created on Sat Sep 23 09:01:15 2017
 # -*- coding: utf-8 -*-
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 sys.path.append("../Tag2Network/tag2network")
 
 import os.path
@@ -24,10 +24,9 @@ idf = False
 # Define input and output file paths
 dictpath = "."
 datapath = "Results"
-#fname = os.path.join(datapath, "scifi_test.txt") #test with first 500 records
-fname = os.path.join(datapath, "scifi_4-2-18.txt") 
 sdname = os.path.join(dictpath, "scifi_syndic_4-2-2018.xlsx")
-outname = os.path.join(datapath, "scifi_network_noIDF_4-4-18.xlsx")
+fname = os.path.join(datapath, "scifi_4-2-18.txt") 
+outname = os.path.join(datapath, "scifi_network_NoIDF_4-4-18.xlsx")
 plotfile = os.path.join(datapath, "scifi_plot_IDF_4-4-18.pdf")
 
 
@@ -69,7 +68,7 @@ df['keyword list'] = df['enhanced_keywords'].str.replace("|", ", ")
 buildTagNetwork(df, color_attr="Cluster", tagAttr=kwAttr, dropCols=dropCols, 
                 outname=outname,idf=idf,
                 nodesname=None, edgesname=None, plotfile=plotfile,
-                toFile=True, doLayout=False, draw=False)
+                toFile=True, doLayout=True, draw=False)
 
 
 
