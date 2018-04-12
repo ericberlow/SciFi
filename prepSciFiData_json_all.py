@@ -90,7 +90,7 @@ multiReplaceFn(df,'published',monthflags,' MO')
 multiReplaceFn(df,'published',dayflags,'DAY')
 df['year'] = df['published'].apply(lambda x: getYearFn(x)) # TODO: STILL MISSING CASES where no day mentioned)
 df['year'] = df['year'].apply(lambda x: formatYrFn(x))
-df['year_20-21st-Century'] = df['year'].apply(lambda x: np.round(x,0) if x > 1900 else None)
+df['year_20-21st-Century'] = df['year'].apply(lambda x: np.round(x,0) if x > 1900 else 1900)
 df['author_tags'] = df['author']
 
 
@@ -114,9 +114,13 @@ df['text'] = df['text'].str.lower()
 dropCols = ['reviews', 'list_of_reviews', 'review_text','ratings', 'genre_list', 'genre_string']
 df.drop(dropCols, axis=1, inplace=True)
 
+
 colOrder = ['author','author_tags', 'title','year', 'year_20-21st-Century', 'year(s)_published', 'log_n_reviews','n_reviews', 'plot', 'url', 'text','genre_tags']
 
 df = df[colOrder]
+df.drop_duplicates(subset='title', keep="last", inplace=True)
+df = df[df['n_reviews']>20]
+
 
 # write tab-delmited text file
 print("writing output file to %s"%outpath)

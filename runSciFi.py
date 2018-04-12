@@ -26,7 +26,7 @@ dictpath = "."
 datapath = "Results"
 sdname = os.path.join(dictpath, "scifi_syndic_4-2-2018.xlsx")
 fname = os.path.join(datapath, "scifi_4-2-18.txt") 
-outname = os.path.join(datapath, "scifi_network_NoIDF_4-4-18.xlsx")
+outname = os.path.join(datapath, "scifi_network_noIDF_4-4-18.xlsx")
 plotfile = os.path.join(datapath, "scifi_plot_IDF_4-4-18.pdf")
 
 
