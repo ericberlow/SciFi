@@ -13,12 +13,12 @@ import glob as glob
 import sys
 import numpy as np
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
 datapath = "data_json"
 outpath = "Results"
-outname = "scifi_4-2-18.txt"
+outname = "scifi_201807.txt"
 #outname = "test10.txt"
 
 
@@ -77,6 +77,8 @@ newdata = [(v.update({'title':k}),v)[1] for book in allbooks for k,v in book.ite
 df = pd.DataFrame(newdata)
 df = df.fillna('')
 #df = df.iloc[0:100,:] #test with first 10 records
+
+print("cleaning and enriching dataframe")
 
 # year is buried in a string which is not consistent - split and find yr
 dayflags = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th',
