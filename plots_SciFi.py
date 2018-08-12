@@ -68,7 +68,6 @@ print('make dataframs of keyword distribution, concepts distribution, n keywords
 ## keywords 
 tags_df = buildTagHistDf(ndfIDF, 'keywords') 
 ## concepts 
-ndfIDF['concepts'] = ndfIDF['concepts'].apply(lambda x: '|'.join(x)) #convert list to string
 concepts_df = buildTagHistDf(ndfIDF, 'concepts') 
 
 # n keywords per book count
