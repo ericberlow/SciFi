@@ -141,7 +141,7 @@ winter2_df = pd.DataFrame({'year':winter2_x, 'y': winter2_y, 'period': winter2_l
 
 
  ## Quiet Years ##
-quiet_x = list(range(1993,2012))
+quiet_x = list(range(1993,2011))
 quiet_y = [1.6]*len(quiet_x)
 quiet_label = ["Low Profile Progress"]*len(quiet_x)
 quiet_df = pd.DataFrame({'year':quiet_x, 'y': quiet_y, 'period':quiet_label})
@@ -235,7 +235,7 @@ text = alt.Chart(annotate_df).mark_text(
     ).transform_filter(   ## only select one year from each period to render the label ##
     (alt.datum.year == 1952)| (alt.datum.year == 1962)| (alt.datum.year == 1974)|
     (alt.datum.year == 1981)| (alt.datum.year == 1988)| (alt.datum.year == 1999)|
-    (alt.datum.year == 2012)  
+    (alt.datum.year == 2011)  
 )
 
 # multiple chart layout  and save chart
