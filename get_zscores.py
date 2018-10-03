@@ -23,9 +23,8 @@ df = pd.read_excel(infile, sheet_name='Nodes')[['author','title','year','n_revie
 df['concept_list'] = df['concepts'].str.split('|').apply(lambda x: [s.strip() for s in x]) # split tags and remove spaces
 df['AI'] = df['concept_list'].apply(lambda x: True if 'AI' in x else False)
 
-df = df[df['year']>=1930]
+df = df[df['year']>=1950]
 df = df[['year', 'AI']].sort_values(by='year')
-
 
 
 #%%   #################### 
@@ -164,18 +163,19 @@ color_palette = ['#355fdc', '#FFC300'] # end points of color range
 line_palette = ['#1a1a1a','#1a1a1a','#cccccc','#cccccc','#cccccc','#cccccc','#cccccc']
 
 # plot number of books published per year vs time
-books_v_time = alt.Chart(zdf, width=1000, height=150).mark_circle().encode(
+books_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
     x=alt.X('year:O',
-            axis=alt.Axis(title=None, labels=True, grid=False)
+            axis=alt.Axis(title=None, labels=False, ticks=False, grid=False)
             ),
     y=alt.Y('books_published:Q',
             axis=alt.Axis(title='SciFi Books Published', 
                           grid=False)
             ),
+    order= 'year',
     color=alt.Color('roll_centered_pctl_frac_AI', 
                     scale=alt.Scale(range=color_palette), 
-                    legend=None),
-    size = alt.value(50)
+                    legend=None)
+ #   size = alt.value(5)
     )
 
 
