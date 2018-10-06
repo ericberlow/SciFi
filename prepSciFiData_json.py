@@ -18,7 +18,7 @@ import numpy as np
 
 datapath = "data_json"
 outpath = "Results"
-outname = "scifi_201807.txt"
+outname = "scifi_201810.txt"
 #outname = "test10.txt"
 
 

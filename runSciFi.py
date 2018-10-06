@@ -15,30 +15,21 @@ sys.path.append("../Tag2Network/tag2network")
 
 import os.path
 import pandas as pd
-import numpy as np
+#import numpy as np
 from Tags.BuildKeywords import buildKeywords
 from Network.BuildNetwork import buildTagNetwork
-from collections import Counter, OrderedDict
-import holoviews as hv
-from bokeh.io import output_file, show
-#from bokeh.io import save
-from bokeh.plotting import reset_output
-hv.extension('bokeh','matplotlib')
-Colors = ['#2aadbf','#f06b51', '#fbb44d', '#616161','#334e7d','#1a7480','#539280'] # blue, orange, yellow, gray, dark blue, ocean green, light green
 
 
 # Define input and output file paths
 dictpath = "."
 datapath = "Results"
 termdictname = os.path.join(dictpath, "scifi_syndic_conceptdic.xlsx")
-filename = os.path.join(datapath, "scifi_201807.txt") 
-kwdname_IDF = os.path.join(datapath, "scifi_network_IDF_201807.xlsx")
-kwdname_noIDF = os.path.join(datapath, "scifi_network_noIDF_201807.xlsx")
-cncptname_IDF = os.path.join(datapath, "scifi_conceptNetwork_IDF_201807.xlsx")
-cncptname_noIDF = os.path.join(datapath, "scifi_conceptNetwork_noIDF_201807.xlsx")
+filename = os.path.join(datapath, "scifi_201810.txt") 
+kwdname_IDF = os.path.join(datapath, "scifi_network_IDF_201810.xlsx")
+kwdname_noIDF = os.path.join(datapath, "scifi_network_noIDF_201810.xlsx")
+#cncptname_IDF = os.path.join(datapath, "scifi_conceptNetwork_IDF_201807.xlsx")
+#cncptname_noIDF = os.path.join(datapath, "scifi_conceptNetwork_noIDF_201807.xlsx")
 
-
-#plotfile = os.path.join(datapath, "scifi_plot_IDF_4-4-18.pdf")
 
 #%%
 
@@ -48,8 +39,9 @@ df = pd.read_csv(filename, sep='\t', header=0, encoding='utf-8')
 print ('data reading done')
 df = df.fillna('')
 df['year'] = df['year'].apply(pd.to_numeric) 
-df = df[df['year']>=1850] # keep all books published since 1900
+df = df[df['year']>=1900] # keep all books published since 1900
 #df = df.iloc[0:500,:] #test with first 500 records
+
 #%%
 
 # read dictonary of search terms mapped to common terms (key is search term, value is unique common term)
@@ -115,14 +107,17 @@ buildTagNetwork(df, color_attr="Cluster", tagAttr='eKwds', dropCols=[],
                 nodesname=None, edgesname=None, plotfile=None,
                 toFile=True, doLayout=False, draw=False)
 
-#%%  build networks linked by CONCEPT similarity
+
+'''
+#%%  
+### build networks linked by CONCEPT similarity
 # with IDF - downweight common terms
 buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[], 
                 outname=cncptname_IDF,idf=True,
                 nodesname=None, edgesname=None, plotfile=None,
                 toFile=True, doLayout=False, draw=False)
 
-#%%  build networks linked by CONCEPT similarity
+### build networks linked by CONCEPT similarity
 # NO IDF - downweight common terms
 buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[], 
                 outname=cncptname_noIDF,idf=False,
@@ -130,6 +125,7 @@ buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[],
                 toFile=True, doLayout=False, draw=False)
 
 
+'''
 
 #%%  #### load and clean network files ### remove large text block
 # TODO: return df from build network (instead of exporting and importing file)
@@ -160,6 +156,7 @@ ndfIDF = cleanNetwork(kwd_netdfIDF, kwdname_IDF) # clean and rewrite xlsx file w
 kwd_netdfNoIDF = pd.ExcelFile(kwdname_noIDF) # read network xlsx with nodes and links sheets
 ndfNoIDF = cleanNetwork(kwd_netdfNoIDF, kwdname_noIDF) # clean and rewrite xlsx file w 2 sheets 
 
+'''
 # clean concept Network IDF file
 cncpt_netdfIDF = pd.ExcelFile(cncptname_IDF) # read network xlsx with nodes and links sheets
 cncpt_ndfIDF = cleanNetwork(cncpt_netdfIDF, cncptname_IDF) # clean and rewrite xlsx file w 2 sheets 
@@ -167,6 +164,6 @@ cncpt_ndfIDF = cleanNetwork(cncpt_netdfIDF, cncptname_IDF) # clean and rewrite x
 # clean concept Network noIDF file
 cncpt_netdfNoIDF = pd.ExcelFile(cncptname_noIDF) # read network xlsx with nodes and links sheets
 cncpt_ndfNoIDF = cleanNetwork(cncpt_netdfNoIDF, cncptname_noIDF) # clean and rewrite xlsx file w 2 sheets 
-
+'''
 
 

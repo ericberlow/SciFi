@@ -13,28 +13,28 @@ Created on Sun Aug 12 07:15:16 2018
 ##      randomly sampling the same number of books for that year from the entire dataset 
 ##      computing the frac AI books per sample 
 ##      repeating 1000 times to get a distribution of expected frac AI books for that sample size
-##      compute a z_score for the frac AI books for that year
-##      compute the percentile of the distribution that is the observed frac
+##      compute a z_score for the frac AI books for that year (i.e. # standard deviations from the expected mean)
+##      compute the percentile score of the observed frac AI books (i.e., what % of random trials are less than the observed value)
 ## 4 - Plots trends of AI publishing over time 
 ##      Overlays historic events on the trend. 
 
 ## The z_score answers - 
-#       - what is the frac AI books *relative to expected by chance*
+#       - what is the frac AI books relative to average expected by chance (divided by the std dev of chance values)
 ## The percentile answers :
 ##      - how surprising is the observed frac AI?
-##      - what fraction of the trials had a lower frac AI than the observed one
+##      - what fraction of the trials had a lower frac AI value than the observed one
 
 #%%
 
 import pandas as pd
 import altair as alt
-#import numpy as np
+import numpy as np
 
 pd.set_option('display.expand_frame_repr', False) # expand display of data columns if screen is wide
 
 # Define input and output file paths
 datapath = "Results/"
-infile = (datapath + "scifi_network_noIDF_201807.xlsx")
+infile = (datapath + "scifi_network_noIDF_201810.xlsx")
 
 #%%   #################### 
 print('reading nodes files')
@@ -44,6 +44,7 @@ df = pd.read_excel(infile, sheet_name='Nodes')[['author','title','year','n_revie
 df['concept_list'] = df['concepts'].str.split('|').apply(lambda x: [s.strip() for s in x]) # split tags and remove spaces
 df['AI'] = df['concept_list'].apply(lambda x: True if 'AI' in x else False)
 
+# filter out years prior to beginning of AI
 df = df[df['year']>=1950]
 df = df[['year', 'AI']].sort_values(by='year')
 
@@ -68,17 +69,17 @@ rollCols = ['n_books','n_AI', 'frac_AI']
 for col in rollCols: 
     yrdf['roll_'+col] = yrdf[col].rolling(3, min_periods=3, center=True).mean()
 
-#round columns    
+#round decimals   
 roundCols = ['frac_AI', 'roll_n_books', 'roll_n_AI', 'roll_frac_AI']
 for col in roundCols: 
     yrdf[col] = yrdf[col].apply(lambda x: round(x, 2))
   
-yrdf.fillna(1, inplace=True)
-yrdf['roll_n_books'] = yrdf['roll_n_books'].apply(lambda x: int(x))
+yrdf.fillna(0, inplace=True) # rolling mean on ends (1949 and 2018) is NaN.
+yrdf['roll_n_books'] = yrdf['roll_n_books'].apply(lambda x: int(x)) #convert rolling mean to int to randomly sample int books.
 
 #%%   #################### 
 # get sampled z-score and percentile for observed rolling frac AI books in each year
-# answer the question "what is the likelihood that my observed frac of AI books could have been observed by chance? 
+# answers the question "what is the likelihood that my observed frac of AI books could have been observed by chance?"" 
 # for each year, sample the same nbooks from the full dataset as the rolling mean n books for that year 
 # for each sample, compute the fraction of books with AI
 # repeat 1000 times and compute the mean and std of the frac AI books across random samples
@@ -104,10 +105,15 @@ def get_sampled_zscore (group, df=df, attr='AI',niter=1000):
     nbooks = group['roll_n_books'].values[0] # rolling mean of total books for the year
     obs_frac = group['roll_frac_AI'].values[0] # rolling mean of frac books for the year
     for i in range (0, niter):
-        smpl_df = df.sample(nbooks) # get random sample of same size as the group
-        smpl_frac_ai = get_frac(smpl_df, attr=attr) # get frac ai books in the sample
-        sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
-        print("%.2f AI books in sample %d of %d books in year %d"%(smpl_frac_ai, i, nbooks, group['year'].values[0]))
+        if np.isnan(nbooks) == False:
+            smpl_df = df.sample(nbooks) # get random sample of same size as the group
+            smpl_frac_ai = get_frac(smpl_df, attr=attr) # get frac ai books in the sample
+            sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
+            print("%.2f AI books in sample %d of %d books in year %d"%(smpl_frac_ai, i, nbooks, group['year'].values[0]))
+        else:
+            smpl_frac_ai = np.nan # get frac ai books in the sample
+            sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
+
     sample_fracs = pd.Series(sample_frac_list).sort_values()  #convert list of sample fracs to series
     group['pctl_frac_'+attr] = sample_fracs.searchsorted(obs_frac)[0]/len(sample_fracs) #get percentile of the obs value
     #group['cntrd_pct_obs_frac_'+attr] = (group['pctl_obs_frac_'+attr] - 0.5)/0.5 # center the percentile at 50th pctl = 0
@@ -118,23 +124,22 @@ def get_sampled_zscore (group, df=df, attr='AI',niter=1000):
 
 
 #%%   #################### 
-
 # # group by year and compute scores 
 zdf = yrdf.groupby(['year']).apply(get_sampled_zscore) # adds extra computed columns to original ones. 
 
 
 #%%   #################### 
+# trim end years (1949 had NaN, 2016-2018 had unusually low n books)
+zdf = zdf[(zdf['year']>1949) & (zdf['year'] < 2016)] 
 
-zdf = zdf[(zdf['roll_n_books']>=10) & ((zdf['year']>=1950) & (zdf['year'] < 2016))] # trim years prior to 1950 and fewer than 10 books.
-
-yrfill_df = pd.DataFrame({'year': range(zdf['year'].min(), zdf['year'].max()+1)}) # make dataframe with complete years
+# make new dataframe with complete sequence of years 1950-2015
+yrfill_df = pd.DataFrame({'year': range(zdf['year'].min(), zdf['year'].max()+1)}) 
 zdf = zdf.merge(yrfill_df, on='year', how='outer')  #merge data to pad missing years
 zdf.sort_values(by='year', inplace=True) 
 
 
-
 #%%   #################### 
-#clean up dataset and reorder cols - write excel file to play with. 
+#clean up dataset and reorder cols - write excel file to play with it. 
 orderCols = ['year', 'n_books', 'n_AI', 'frac_AI', 
              'roll_n_books', 'roll_n_AI', 'roll_frac_AI', 
              'pctl_frac_AI', 'z_frac_AI']
@@ -142,51 +147,51 @@ orderCols = ['year', 'n_books', 'n_AI', 'frac_AI',
 zdf = zdf[orderCols]
 zdf['top_ref']= 0.80
 zdf['bottom_ref'] = -0.80
-zdf.fillna(0, inplace=True)
+#zdf.fillna(0, inplace=True)
 zdf.sort_values(by='year', inplace=True)
 zdf.to_excel(datapath + "AI_zscores.xlsx", index=False)
 
 #%% #############
 #  ADD CHART ANNOTATIONS FOR TIME PERIODS
 
-## Birth ##
+## Birth of AI 1952-1956 ##
 birth_x = list(range(1952, 1957))  
 birth_y = [1.5]*len(birth_x)
 birth_label = ["Birth of AI"]*len(birth_x)
 birth_df = pd.DataFrame({'year':birth_x, 'y': birth_y, 'period': birth_label})
 
-## Golden Years ##
+## Golden Years 1956-1973 ##
 golden_x = list(range(1956, 1974))  
 golden_y = [1.6]*len(golden_x)
 golden_label = ["Golden Years"]*len(golden_x)
 golden_df = pd.DataFrame({'year':golden_x, 'y': golden_y, 'period': golden_label})
 
-## First AI Winter ##
+## First AI Winter 1973-1980 ##
 winter1_x = list(range(1973,1981))
 winter1_y = [1.5]*len(winter1_x)
 winter1_label = ["1st AI Winter"]*len(winter1_x)
 winter1_df = pd.DataFrame({'year':winter1_x, 'y': winter1_y, 'period': winter1_label})
 
-## Expert System Boom  ##
+## Expert System Boom  1980 - 1987 ##
 boom_x = list(range(1980, 1988))
 boom_y = [1.6]*len(boom_x)
 boom_label = ["Expert Systems"]*len(boom_x)
 boom_df = pd.DataFrame({'year':boom_x, 'y': boom_y,  'period': boom_label})
 
-## Second AI Winter ##
+## Second AI Winter 1987 - 1993 ##
 winter2_x = list(range(1987,1994))
 winter2_y = [1.5]*len(winter2_x)
 winter2_label = ["2nd AI Winter"]*len(winter2_x)
 winter2_df = pd.DataFrame({'year':winter2_x, 'y': winter2_y, 'period': winter2_label})
 
 
- ## Quiet Years ##
+ ## Quiet Years - Quite Progress 1993 - 2011##
 quiet_x = list(range(1993,2012))
 quiet_y = [1.6]*len(quiet_x)
 quiet_label = ["Low Profile Progress"]*len(quiet_x)
 quiet_df = pd.DataFrame({'year':quiet_x, 'y': quiet_y, 'period':quiet_label})
 
-## Big Data Bump ##
+## Big Data Bump - Deep Learning Boom 2011 - 2016##
 bigdata_x = list(range(2011,2017))
 bigdata_y = [1.7]*len(bigdata_x)
 bigdata_label = ["Big Data Era"]*len(bigdata_x)
@@ -198,13 +203,14 @@ annotate_df.sort_values(by='year', ascending=True, inplace=True)
 #%% ##########
 ## MAKE CHARTS
 ##############
-#plot rolling mean of standardized fraction of AI books over time - color by the avg percentile of that value show significance.
+# plot zscore of 3 yr rolling mean fraction of AI books over time 
+# color by significance - or the percentile score of the observed value.
 
 color_palette = ['#355fdc', '#FFC300'] # end points of color range 
 line_palette = ['#1a1a1a','#1a1a1a','#cccccc','#cccccc','#cccccc','#cccccc','#cccccc']
 
 # plot number of books published per year vs time
-books_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
+nbooks_v_time = alt.Chart(zdf, width=1000, height=150).mark_circle().encode(
     x=alt.X('year:O',
             axis=alt.Axis(title=None, labels=False, ticks=False, grid=False)
             ),
@@ -219,9 +225,23 @@ books_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
  #   size = alt.value(5)
     )
 
+# plot number of AI books published per year vs time
+fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
+    x=alt.X('year:O',
+            axis=alt.Axis(title=None, labels=False, ticks=False, grid=False)
+            ),
+    y=alt.Y('roll_n_AI:Q',
+            axis=alt.Axis(title='SciFi Books Published', 
+                          grid=False)
+            ),
+    order= 'year',
+    color=alt.value('#cccccc')
+    )
+
+# overlay total books and total AI books per yer  vs time
+books_v_time = nbooks_v_time + fracAI_v_time
 
 # plot rolling average zscore of frac AI books  vs time
-
 ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
     x=alt.X("year:O",
             axis=alt.Axis(title='Year', 
@@ -238,8 +258,8 @@ ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
                     legend=None
                     )
   )
-## add zscore significance ref lines
 
+## add zscore significance band ref lines
 sig_band = alt.Chart(zdf).mark_area(opacity=0.2).encode(
     x='year:O',
     y='top_ref',
@@ -249,7 +269,7 @@ sig_band = alt.Chart(zdf).mark_area(opacity=0.2).encode(
 )
 
 
-# plot timeline annotations - lines 
+# plot timeline annotations - lines
 annotate = alt.Chart(annotate_df, width=1000).mark_line().encode(
         x="year:O",
         y=alt.Y("y",
@@ -263,7 +283,7 @@ annotate = alt.Chart(annotate_df, width=1000).mark_line().encode(
         size=alt.value(5)
         )
 
-# add text labels to annotations 
+# add text labels to annotations by plotting  labels for specific points
 text = alt.Chart(annotate_df).mark_text(
     align='left',
     baseline='middle',
