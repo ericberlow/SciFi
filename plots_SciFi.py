@@ -13,7 +13,6 @@ import sys
 #sys.setdefaultencoding('utf-8')
 sys.path.append("../Tag2Network/tag2network")
 
-import os.path
 import pandas as pd
 import numpy as np
 from collections import Counter, OrderedDict
@@ -27,11 +26,9 @@ Colors = ['#2aadbf','#f06b51', '#fbb44d', '#616161','#334e7d','#1a7480','#539280
 
 # Define input and output file paths
 dictpath = "."
-datapath = "Results"
-kwdname_IDF = os.path.join(datapath, "scifi_network_IDF_201807.xlsx")
-kwdname_noIDF = os.path.join(datapath, "scifi_network_noIDF_201807.xlsx")
-cncptname_IDF = os.path.join(datapath, "scifi_conceptNetwork_IDF_201807.xlsx")
-cncptname_noIDF = os.path.join(datapath, "scifi_conceptNetwork_noIDF_201807.xlsx")
+datapath = "Results/"
+kwdname_IDF = (datapath + "scifi_network_IDF_201810.xlsx")
+kwdname_noIDF = (datapath + "scifi_network_noIDF_201810.xlsx")
 
 
 #%%   #################### 
@@ -39,8 +36,6 @@ print('reading nodes files')
 
 ndfIDF = pd.read_excel(kwdname_IDF, sheet_name='Nodes') # read nodes file
 ndfNoIDF = pd.read_excel(kwdname_noIDF, sheet_name='Nodes') # read nodes file
-cncpt_ndfIDF = pd.read_excel(cncptname_IDF, sheet_name='Nodes') # read nodes file
-cncpt_ndfNoIDF = pd.read_excel(cncptname_noIDF, sheet_name='Nodes') # read nodes file
 
 
 
@@ -103,7 +98,7 @@ kwdsLayout = hv.Layout(kwdBars + conceptBars + kwdCounts).cols(1).options(
 reset_output() # clear output_file
 renderer = hv.renderer('bokeh')
 tagPlot = renderer.get_plot(kwdsLayout).state
-output_file("tagHist.html") #name of file to launch in browser
+output_file(datapath+"tagHist.html") #name of file to launch in browser
 show(tagPlot)
 
 
@@ -113,12 +108,10 @@ show(tagPlot)
 print('make dataframe of all culsters for each network')
 kwdclusIDF = ndfIDF['cluster_name'].str.strip()
 kwdclusNoIDF = ndfNoIDF['cluster_name'].str.strip()
-cncpt_clusIDF = cncpt_ndfIDF['cluster_name'].str.strip()
-cncpt_clusNoIDF = cncpt_ndfNoIDF['cluster_name'].str.strip()
 
 
 clusdf = pd.DataFrame({'keywordCluster_IDF': kwdclusIDF, 'keywordCluster_noIDF':kwdclusNoIDF,
-                       'conceptCluster_IDF': cncpt_clusIDF, 'conceptCluster_noIDF':cncpt_clusNoIDF,})
+                       })
 clusdf = clusdf.fillna('')
 
 #%%  ####################################
@@ -128,8 +121,6 @@ print('make, display, save keyword and concept cluster histograms for IDF vs noI
 
 IDF_kwdclusters = buildTagHistDf(clusdf, 'keywordCluster_IDF')
 noIDF_kwdclusters = buildTagHistDf(clusdf, 'keywordCluster_noIDF')
-IDF_cncptclusters = buildTagHistDf(clusdf, 'conceptCluster_IDF')
-noIDF_cncptclusters = buildTagHistDf(clusdf, 'conceptCluster_noIDF')
 
 
 kwdclusIDF_Bars = hv.Bars(IDF_kwdclusters,'keywordCluster_IDF', 'count' ).options(title_format='Keyword Clusters  IDF',labelled=['x'],
@@ -140,22 +131,15 @@ kwdclusNoIDF_Bars = hv.Bars(noIDF_kwdclusters,'keywordCluster_noIDF', 'count' ).
         color=hv.Cycle(values=Colors), color_index='keywordCluster_noIDF', width=650, height=600,
         invert_axes=True,invert_yaxis=True, tools=['hover'], show_legend=False, show_grid=True )
 
-cncptclusIDF_Bars = hv.Bars(IDF_cncptclusters,'conceptCluster_IDF', 'count' ).options(title_format='Concept Clusters IDF',labelled=['x'],
-        color=hv.Cycle(values=Colors), color_index='conceptCluster_IDF', width=750, height=600,
-        invert_axes=True,invert_yaxis=True, tools=['hover'], show_legend=False, show_grid=True )
-
-cncptclusNoIDF_Bars = hv.Bars(noIDF_cncptclusters,'conceptCluster_noIDF', 'count' ).options(title_format='Concept Clusters noIDF',labelled=['x'],
-        color=hv.Cycle(values=Colors), color_index='conceptCluster_noIDF', width=650, height=600,
-        invert_axes=True,invert_yaxis=True, tools=['hover'], show_legend=False, show_grid=True )
 
 
-clusLayout = hv.Layout(kwdclusIDF_Bars + kwdclusNoIDF_Bars + cncptclusIDF_Bars + cncptclusNoIDF_Bars).cols(2).options(
+clusLayout = hv.Layout(kwdclusIDF_Bars + kwdclusNoIDF_Bars).cols(2).options(
         sizing_mode='scale_width', normalize=False, shared_axes=False)
 
 # Convert to bokeh plot then save and show using bokeh
 reset_output() # clear output_file
 clusPlot = renderer.get_plot(clusLayout).state
-output_file("clusHist.html") #name of file to launch in browser
+output_file(datapath+"clusHist.html") #name of file to launch in browser
 show(clusPlot)
 
 

@@ -105,7 +105,7 @@ def get_sampled_zscore (group, df=df, attr='AI',niter=1000):
     nbooks = group['roll_n_books'].values[0] # rolling mean of total books for the year
     obs_frac = group['roll_frac_AI'].values[0] # rolling mean of frac books for the year
     for i in range (0, niter):
-        if np.isnan(nbooks) == False:
+        if nbooks > 0:
             smpl_df = df.sample(nbooks) # get random sample of same size as the group
             smpl_frac_ai = get_frac(smpl_df, attr=attr) # get frac ai books in the sample
             sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
