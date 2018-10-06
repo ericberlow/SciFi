@@ -54,7 +54,7 @@ def sumstats (group, attr='AI'):
     d['n_books'] = len(group) # length of group (total books)
     d['n_'+attr] =  group[attr].sum() #sum all 1's in boolean
     d['frac_'+attr] = d['n_'+attr]/d['n_books'] # fraction books tagged with AI
-    df = pd.DataFrame(d) # make dataframe of summary stats - need to pass index to dataframe
+    df = pd.DataFrame(d, index=[0]) # make dataframe of summary stats - need to pass index to dataframe
     return df
     
 yrdf = df.groupby(['year']).apply(lambda x: sumstats(x, attr='AI'))
@@ -73,7 +73,7 @@ roundCols = ['frac_AI', 'roll_n_books', 'roll_n_AI', 'roll_frac_AI']
 for col in roundCols: 
     yrdf[col] = yrdf[col].apply(lambda x: round(x, 2))
   
-yrdf.fillna(0, inplace=True)
+yrdf.fillna(1, inplace=True)
 yrdf['roll_n_books'] = yrdf['roll_n_books'].apply(lambda x: int(x))
 
 #%%   #################### 
@@ -125,31 +125,25 @@ zdf = yrdf.groupby(['year']).apply(get_sampled_zscore) # adds extra computed col
 
 #%%   #################### 
 
-zdf = zdf[(zdf['roll_n_books']>=10) & ((zdf['year']>=1950) & (zdf['year'] < 2017))] # trim years prior to 1950 and fewer than 10 books.
+zdf = zdf[(zdf['roll_n_books']>=10) & ((zdf['year']>=1950) & (zdf['year'] < 2016))] # trim years prior to 1950 and fewer than 10 books.
 
 yrfill_df = pd.DataFrame({'year': range(zdf['year'].min(), zdf['year'].max()+1)}) # make dataframe with complete years
 zdf = zdf.merge(yrfill_df, on='year', how='outer')  #merge data to pad missing years
 zdf.sort_values(by='year', inplace=True) 
 
 
-#%%   #################### 
-'''
-#compute 3 yr rolling avg for each statistic
- 
-rollCols = ['obs_frac_AI','z_frac_AI', 'pctl_frac_AI','centered_pctl_frac_AI', 'books_published' ]
-for col in rollCols: 
-    zdf['roll_'+col] = zdf[col].rolling(3, min_periods=3, center=True).mean()
-'''
 
 #%%   #################### 
 #clean up dataset and reorder cols - write excel file to play with. 
-orderCols = ['year', 'n_books', 'n_AI', 'frac_AI', 'roll_n_books', 'roll_n_AI',
-       'roll_frac_AI', 'pctl_frac_AI', 'z_frac_AI']
+orderCols = ['year', 'n_books', 'n_AI', 'frac_AI', 
+             'roll_n_books', 'roll_n_AI', 'roll_frac_AI', 
+             'pctl_frac_AI', 'z_frac_AI']
 
 zdf = zdf[orderCols]
-zdf['top_ref']= 0.75
-zdf['bottom_ref'] = -0.75
+zdf['top_ref']= 0.80
+zdf['bottom_ref'] = -0.80
 zdf.fillna(0, inplace=True)
+zdf.sort_values(by='year', inplace=True)
 zdf.to_excel(datapath + "AI_zscores.xlsx", index=False)
 
 #%% #############
@@ -187,15 +181,15 @@ winter2_df = pd.DataFrame({'year':winter2_x, 'y': winter2_y, 'period': winter2_l
 
 
  ## Quiet Years ##
-quiet_x = list(range(1993,2011))
+quiet_x = list(range(1993,2012))
 quiet_y = [1.6]*len(quiet_x)
 quiet_label = ["Low Profile Progress"]*len(quiet_x)
 quiet_df = pd.DataFrame({'year':quiet_x, 'y': quiet_y, 'period':quiet_label})
 
 ## Big Data Bump ##
 bigdata_x = list(range(2011,2017))
-bigdata_y = [1.5]*len(bigdata_x)
-bigdata_label = ["Big Data Boom"]*len(bigdata_x)
+bigdata_y = [1.7]*len(bigdata_x)
+bigdata_label = ["Big Data Era"]*len(bigdata_x)
 bigdata_df = pd.DataFrame({'year':bigdata_x, 'y': bigdata_y, 'period': bigdata_label })
 
 annotate_df = pd.concat([birth_df, golden_df, winter1_df, boom_df, winter2_df, quiet_df, bigdata_df], sort=False)
@@ -234,7 +228,7 @@ ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
                           grid=False)
             ),          
     y=alt.Y("z_frac_AI:Q",
-            scale=alt.Scale(domain =[-1.8, 1.8]),
+            scale=alt.Scale(domain =[-1.5, 1.5]),
             axis=alt.Axis(title='AI Books Relative to Expected', 
                           grid=False)
             ),
@@ -259,7 +253,7 @@ sig_band = alt.Chart(zdf).mark_area(opacity=0.2).encode(
 annotate = alt.Chart(annotate_df, width=1000).mark_line().encode(
         x="year:O",
         y=alt.Y("y",
-            scale=alt.Scale(domain =[-1.8, 1.8])
+            scale=alt.Scale(domain =[-1.5, 1.5])
                 ),
         color=alt.Color('period', 
                 scale=alt.Scale(range=line_palette),  
@@ -282,7 +276,7 @@ text = alt.Chart(annotate_df).mark_text(
     ).transform_filter(   ## only select one year from each period to render the label ##
     (alt.datum.year == 1952)| (alt.datum.year == 1962)| (alt.datum.year == 1974)|
     (alt.datum.year == 1981)| (alt.datum.year == 1988)| (alt.datum.year == 1999)|
-    (alt.datum.year == 2011)  
+    (alt.datum.year == 2012)  
 )
 
 # multiple chart layout  and save chart
