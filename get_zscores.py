@@ -6,7 +6,7 @@ Created on Sun Aug 12 07:15:16 2018
 @author: ericlberlow
 """
 #%%
-### Description of what this script does
+### What this script does
 ## 1 - summarizes total books and fraction of AI books per year
 ## 2 - smooths the trend with a 3 yr rolling average of the frac AI books per year
 ## 3 - computes a sampled z-score for that observed frac AI books per year by
@@ -18,9 +18,9 @@ Created on Sun Aug 12 07:15:16 2018
 ## 4 - Plots trends of AI publishing over time 
 ##      Overlays historic events on the trend. 
 
-## The z_score answers - 
+## The z_score answers the question - 
 #       - what is the frac AI books relative to average expected by chance (divided by the std dev of chance values)
-## The percentile answers :
+## The percentile answers the questions :
 ##      - how surprising is the observed frac AI?
 ##      - what fraction of the trials had a lower frac AI value than the observed one
 
@@ -35,6 +35,8 @@ pd.set_option('display.expand_frame_repr', False) # expand display of data colum
 # Define input and output file paths
 datapath = "Results/"
 infile = (datapath + "scifi_network_noIDF_201810.xlsx")
+timeperiods = "AI_time_periods.xlsx"
+
 
 #%%   #################### 
 print('reading nodes files')
@@ -152,62 +154,18 @@ zdf.sort_values(by='year', inplace=True)
 zdf.to_excel(datapath + "AI_zscores.xlsx", index=False)
 
 #%% #############
-#  ADD CHART ANNOTATIONS FOR TIME PERIODS
+#  get chart annotations for time periods (created in AI_timeline_annotations.py)
+annotate_df = pd.read_excel(timeperiods)
 
-## Birth of AI 1952-1956 ##
-birth_x = list(range(1952, 1957))  
-birth_y = [1.5]*len(birth_x)
-birth_label = ["Birth of AI"]*len(birth_x)
-birth_df = pd.DataFrame({'year':birth_x, 'y': birth_y, 'period': birth_label})
-
-## Golden Years 1956-1973 ##
-golden_x = list(range(1956, 1974))  
-golden_y = [1.6]*len(golden_x)
-golden_label = ["Golden Years"]*len(golden_x)
-golden_df = pd.DataFrame({'year':golden_x, 'y': golden_y, 'period': golden_label})
-
-## First AI Winter 1973-1980 ##
-winter1_x = list(range(1973,1981))
-winter1_y = [1.5]*len(winter1_x)
-winter1_label = ["1st AI Winter"]*len(winter1_x)
-winter1_df = pd.DataFrame({'year':winter1_x, 'y': winter1_y, 'period': winter1_label})
-
-## Expert System Boom  1980 - 1987 ##
-boom_x = list(range(1980, 1988))
-boom_y = [1.6]*len(boom_x)
-boom_label = ["Expert Systems"]*len(boom_x)
-boom_df = pd.DataFrame({'year':boom_x, 'y': boom_y,  'period': boom_label})
-
-## Second AI Winter 1987 - 1993 ##
-winter2_x = list(range(1987,1994))
-winter2_y = [1.5]*len(winter2_x)
-winter2_label = ["2nd AI Winter"]*len(winter2_x)
-winter2_df = pd.DataFrame({'year':winter2_x, 'y': winter2_y, 'period': winter2_label})
-
-
- ## Quiet Years - Quite Progress 1993 - 2011##
-quiet_x = list(range(1993,2012))
-quiet_y = [1.6]*len(quiet_x)
-quiet_label = ["Low Profile Progress"]*len(quiet_x)
-quiet_df = pd.DataFrame({'year':quiet_x, 'y': quiet_y, 'period':quiet_label})
-
-## Big Data Bump - Deep Learning Boom 2011 - 2016##
-bigdata_x = list(range(2011,2017))
-bigdata_y = [1.7]*len(bigdata_x)
-bigdata_label = ["Big Data Era"]*len(bigdata_x)
-bigdata_df = pd.DataFrame({'year':bigdata_x, 'y': bigdata_y, 'period': bigdata_label })
-
-annotate_df = pd.concat([birth_df, golden_df, winter1_df, boom_df, winter2_df, quiet_df, bigdata_df], sort=False)
-annotate_df.sort_values(by='year', ascending=True, inplace=True)
 
 #%% ##########
 ## MAKE CHARTS
-##############
 # plot zscore of 3 yr rolling mean fraction of AI books over time 
 # color by significance - or the percentile score of the observed value.
+##########
 
 color_palette = ['#355fdc', '#FFC300'] # end points of color range 
-line_palette = ['#1a1a1a','#1a1a1a','#cccccc','#cccccc','#cccccc','#cccccc','#cccccc']
+line_palette = ['#1a1a1a','#1a1a1a','#cccccc','#cccccc','#cccccc','#cccccc','#cccccc'] # black, grey
 
 # plot number of books published per year vs time
 nbooks_v_time = alt.Chart(zdf, width=1000, height=150).mark_circle().encode(
@@ -265,7 +223,6 @@ sig_band = alt.Chart(zdf).mark_area(opacity=0.2).encode(
     y='top_ref',
     y2='bottom_ref',
     color = alt.value('#cccccc')
-    
 )
 
 

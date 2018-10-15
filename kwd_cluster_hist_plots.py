@@ -4,6 +4,13 @@
 Created on Wed Jul 11 10:54:17 2018
 
 @author: ericlberlow
+
+This script makes frequency distribution plots of 
+* keyword tags 
+* concept tags
+* keyworkd clusters
+for both networks. It uses bokeh for rendering interactive charts. 
+
 """
 
 #%%

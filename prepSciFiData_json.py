@@ -113,15 +113,15 @@ df['text'] = df['text'].str.lower()
 
 
 #df = df[df['n_reviews']>0] # remove records with no reviews
-dropCols = ['reviews', 'list_of_reviews', 'review_text','ratings', 'genre_list', 'genre_string']
+dropCols = ['reviews', 'list_of_reviews', 'review_text','ratings', 'genre_list']
 df.drop(dropCols, axis=1, inplace=True)
 
 
-colOrder = ['author','author_tags', 'title','year', 'year_20-21st-Century', 'year(s)_published', 'log_n_reviews','n_reviews', 'plot', 'url', 'text','genre_tags']
+colOrder = ['author','author_tags', 'title','year', 'year_20-21st-Century', 'year(s)_published', 'log_n_reviews','n_reviews', 'plot', 'url', 'text','genre_tags', 'genre_string']
 
 df = df[colOrder]
 df.drop_duplicates(subset='title', keep="last", inplace=True)
-df = df[df['n_reviews']>20]
+df = df[df['n_reviews']>50]
 
 
 # write tab-delmited text file

@@ -63,12 +63,12 @@ df['keywords'] = ''  # make blank column because no keywords from goodreads
 
 # add keywords from text: find search terms and map to common keyword term
 # returns a series with lists of keywords, adds columns to df with 'enhanced_keywords' found in text
-print("add keywords")
+print("add keywords from text")
 kwAttr = buildKeywords(df, blacklist, whitelist,
                        kwAttr='keywords', txtAttr='text',
                        syndic=syndic, addFromText=True, enhance=False)
 
-print("keywords added")
+print("keywords added from text")
 
 #%%  clean keyword file  
 # remove records where there was no keyword match
@@ -108,8 +108,8 @@ buildTagNetwork(df, color_attr="Cluster", tagAttr='eKwds', dropCols=[],
                 toFile=True, doLayout=False, draw=False)
 
 
-'''
-#%%  
+#%% 
+''' 
 ### build networks linked by CONCEPT similarity
 # with IDF - downweight common terms
 buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[], 
@@ -131,7 +131,7 @@ buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[],
 # TODO: return df from build network (instead of exporting and importing file)
 
 def cleanNetwork(netdf, netfile):    
-    dropCols = ['text', 'eKwds', 'year_20-21st-Century',]
+    dropCols = ['text', 'eKwds', 'year_20-21st-Century', 'genre_string']
     ndf = netdf.parse('Nodes')
     ldf = netdf.parse('Links')
     ndf.drop(dropCols, axis=1, inplace=True)
