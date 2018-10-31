@@ -108,25 +108,6 @@ buildTagNetwork(df, color_attr="Cluster", tagAttr='eKwds', dropCols=[],
                 toFile=True, doLayout=False, draw=False)
 
 
-#%% 
-''' 
-### build networks linked by CONCEPT similarity
-# with IDF - downweight common terms
-buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[], 
-                outname=cncptname_IDF,idf=True,
-                nodesname=None, edgesname=None, plotfile=None,
-                toFile=True, doLayout=False, draw=False)
-
-### build networks linked by CONCEPT similarity
-# NO IDF - downweight common terms
-buildTagNetwork(df, color_attr="Cluster", tagAttr='concepts', dropCols=[], 
-                outname=cncptname_noIDF,idf=False,
-                nodesname=None, edgesname=None, plotfile=None,
-                toFile=True, doLayout=False, draw=False)
-
-
-'''
-
 #%%  #### load and clean network files ### remove large text block
 # TODO: return df from build network (instead of exporting and importing file)
 
@@ -156,14 +137,5 @@ ndfIDF = cleanNetwork(kwd_netdfIDF, kwdname_IDF) # clean and rewrite xlsx file w
 kwd_netdfNoIDF = pd.ExcelFile(kwdname_noIDF) # read network xlsx with nodes and links sheets
 ndfNoIDF = cleanNetwork(kwd_netdfNoIDF, kwdname_noIDF) # clean and rewrite xlsx file w 2 sheets 
 
-'''
-# clean concept Network IDF file
-cncpt_netdfIDF = pd.ExcelFile(cncptname_IDF) # read network xlsx with nodes and links sheets
-cncpt_ndfIDF = cleanNetwork(cncpt_netdfIDF, cncptname_IDF) # clean and rewrite xlsx file w 2 sheets 
-
-# clean concept Network noIDF file
-cncpt_netdfNoIDF = pd.ExcelFile(cncptname_noIDF) # read network xlsx with nodes and links sheets
-cncpt_ndfNoIDF = cleanNetwork(cncpt_netdfNoIDF, cncptname_noIDF) # clean and rewrite xlsx file w 2 sheets 
-'''
 
 

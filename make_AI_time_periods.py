@@ -5,6 +5,15 @@ Created on Tue Oct  9 06:50:15 2018
 
 @author: ericlberlow
 """
+#%%
+### What this script does
+## generates an file used for annotating the AI trends over time with  the major time periods in the history of AI
+## The source for defining time periods in AI history was https://en.wikipedia.org/wiki/History_of_artificial_intelligence 
+## output file is AI_time_periods.xlsx 
+
+
+#%% #############
+#  ADD CHART ANNOTATIONS FOR TIME PERIODS
 
 import pandas as pd
 

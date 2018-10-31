@@ -197,7 +197,8 @@ fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
     )
 
 # overlay total books and total AI books per yer  vs time
-books_v_time = nbooks_v_time + fracAI_v_time
+#books_v_time = nbooks_v_time + fracAI_v_time
+books_v_time = nbooks_v_time  
 
 # plot rolling average zscore of frac AI books  vs time
 ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
@@ -213,7 +214,7 @@ ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
     color=alt.Color('pctl_frac_AI', 
                     scale=alt.Scale(range=color_palette), 
                     # altair converts this into a smooth color gradient because the y axis is numeric
-                    legend=None
+                    legend=(alt.Legend(title='Percentile'))
                     )
   )
 
