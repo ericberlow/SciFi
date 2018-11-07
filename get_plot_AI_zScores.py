@@ -197,8 +197,8 @@ fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
     )
 
 # overlay total books and total AI books per yer  vs time
-#books_v_time = nbooks_v_time + fracAI_v_time
-books_v_time = nbooks_v_time  
+books_v_time = nbooks_v_time + fracAI_v_time
+#books_v_time = nbooks_v_time  
 
 # plot rolling average zscore of frac AI books  vs time
 ai_v_time = alt.Chart(zdf, width=1000).mark_bar().encode(
@@ -262,7 +262,7 @@ ai_chart = ai_v_time + sig_band + annotate + text
 charts = books_v_time & ai_chart
 charts = charts.configure_view(strokeOpacity=0) # hide the thin outline of each chart 
 
-charts.save(datapath+'annotated_charts_v2.html')
+charts.save(datapath+'annotated_charts_v3.html')
 #charts.serve()  ## launch html in browser - for Spyder
 #charts.display()  ## for jupyter notebooks
 
