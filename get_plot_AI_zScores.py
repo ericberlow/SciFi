@@ -147,8 +147,8 @@ orderCols = ['year', 'n_books', 'n_AI', 'frac_AI',
              'pctl_frac_AI', 'z_frac_AI']
 
 zdf = zdf[orderCols]
-zdf['top_ref']= 0.80
-zdf['bottom_ref'] = -0.80
+zdf['top_ref']= 1
+zdf['bottom_ref'] = -1
 #zdf.fillna(0, inplace=True)
 zdf.sort_values(by='year', inplace=True)
 zdf.to_excel(datapath + "AI_zscores.xlsx", index=False)
@@ -177,14 +177,12 @@ nbooks_v_time = alt.Chart(zdf, width=1000, height=150).mark_circle().encode(
                           grid=False)
             ),
     order= 'year',
-    color=alt.Color('pctl_frac_AI', 
-                    scale=alt.Scale(range=color_palette), 
-                    legend=None)
+    color=alt.value('#808080')    
  #   size = alt.value(5)
     )
 
 # plot number of AI books published per year vs time
-fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
+fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_circle().encode(
     x=alt.X('year:O',
             axis=alt.Axis(title=None, labels=False, ticks=False, grid=False)
             ),
@@ -193,7 +191,9 @@ fracAI_v_time = alt.Chart(zdf, width=1000, height=150).mark_point().encode(
                           grid=False)
             ),
     order= 'year',
-    color=alt.value('#cccccc')
+    color=alt.Color('pctl_frac_AI', 
+                    scale=alt.Scale(range=color_palette), 
+                    legend=None)
     )
 
 # overlay total books and total AI books per yer  vs time
@@ -223,7 +223,7 @@ sig_band = alt.Chart(zdf).mark_area(opacity=0.2).encode(
     x='year:O',
     y='top_ref',
     y2='bottom_ref',
-    color = alt.value('#cccccc')
+    color = alt.value('#696969')
 )
 
 
