@@ -113,7 +113,7 @@ def get_sampled_zscore (group, df=df, attr='AI',niter=1000):
             sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
             print("%.2f AI books in sample %d of %d books in year %d"%(smpl_frac_ai, i, nbooks, group['year'].values[0]))
         else:
-            smpl_frac_ai = np.nan # get frac ai books in the sample
+            smpl_frac_ai = np.nan # assign no data for frac ai books in the sample
             sample_frac_list.append(smpl_frac_ai) # compile list of frac_ai for all samples
 
     sample_fracs = pd.Series(sample_frac_list).sort_values()  #convert list of sample fracs to series
@@ -262,7 +262,7 @@ ai_chart = ai_v_time + sig_band + annotate + text
 charts = books_v_time & ai_chart
 charts = charts.configure_view(strokeOpacity=0) # hide the thin outline of each chart 
 
-charts.save(datapath+'annotated_charts_v3.html')
+charts.save(datapath+'annotated_charts_v4.html')
 #charts.serve()  ## launch html in browser - for Spyder
 #charts.display()  ## for jupyter notebooks
 
